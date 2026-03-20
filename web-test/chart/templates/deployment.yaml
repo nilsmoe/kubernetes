@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # The Deployment name, generated using the fullname helper from _helpers.tpl.
+  # Example output: "my-release-test-website"
+  name: {{ include "test-website.fullname" . }}
+
+  labels:
+    # Standard labels from _helpers.tpl applied to the Deployment itself.
+    {{- include "test-website.labels" . | nindent 4 }}
+
+spec:
+  # Number of pod replicas to run.
+  # This comes from replicaCount in values.yaml.
+  replicas: {{ .Values.replicaCount }}
+
+  selector:
+    matchLabels:
+      # These labels are used by the Deployment to find and manage its pods.
+      # Must match the labels on the pod template below.
+      {{- include "test-website.selectorLabels" . | nindent 6 }}
+
+  template:
+    metadata:
+      labels:
+        # The same selector labels applied to each pod.
+        # The Service uses these labels to find the pods to send traffic to.
+        {{- include "test-website.selectorLabels" . | nindent 8 }}
+
+    spec:
+      containers:
+        - name: nginx
+          # The nginx image and tag from values.yaml.
+          # Example: "nginx:latest"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+
+          # When to pull the image from the registry.
+          # "IfNotPresent" is good for local dev — avoids unnecessary pulls.
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          ports:
+            # The port nginx listens on inside the container.
+            # Nginx serves HTTP on port 80 by default.
+            - name: http
+              containerPort: 80
+              protocol: TCP
+
+          volumeMounts:
+            # Mount the index.html file from the ConfigMap into the nginx
+            # default HTML directory so nginx serves it automatically.
+            - name: html-volume
+              mountPath: /usr/share/nginx/html/index.html
+              # subPath means only this specific key from the ConfigMap
+              # is mounted, not the entire ConfigMap as a folder.
+              subPath: index.html
+
+      volumes:
+        # Define the volume that references the ConfigMap we created
+        # in configmap.yaml. The name must match the volumeMount name above.
+        - name: html-volume
+          configMap:
+            # The ConfigMap name must match what we defined in configmap.yaml.
+            # We use the same fullname helper with the "-html" suffix.
+            name: {{ include "test-website.fullname" . }}-html

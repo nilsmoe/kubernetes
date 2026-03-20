@@ -1,0 +1,82 @@
+# How many pod replicas to run.
+# For a simple local test website, 1 is usually enough.
+replicaCount: 1
+
+image:
+  # The container image to run.
+  # For a static site, nginx is a simple and common choice.
+  repository: nginx
+
+  # The image tag/version.
+  # You can pin a specific version instead of using "latest" if you want repeatable behavior.
+  tag: latest
+
+  # Controls when Kubernetes should pull the image.
+  # "IfNotPresent" is good for local/dev use.
+  pullPolicy: IfNotPresent
+
+service:
+  # Internal Kubernetes Service type.
+  # ClusterIP is the normal choice when traffic comes in through an Ingress.
+  type: ClusterIP
+
+  # Port exposed by the Service inside the cluster.
+  # Nginx serves HTTP on port 80.
+  port: 80
+
+ingress:
+  # Whether to create an Ingress resource.
+  # Set to true so you can reach the site through Traefik.
+  enabled: true
+
+  # The ingress class to use.
+  # In k3s, Traefik is usually the default ingress controller.
+  className: traefik
+
+  # Hostname to use for this website.
+  # Pick a unique host so it does not conflict with Argo CD or other local services.
+  # Example access URL on your Mac:
+  # http://test-website.localhost:8081
+  host: test-website.localhost
+
+  # URL path to route.
+  # "/" means all traffic for this host goes to this site.
+  path: /
+
+html:
+  # The HTML content that will be stored in a ConfigMap
+  # and mounted into nginx as /usr/share/nginx/html/index.html.
+  # You can edit this later to change the page layout/content.
+  content: |
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Test Website</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            background: #f5f7fb;
+            color: #222;
+          }
+          .card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+          }
+          h1 {
+            color: #1d4ed8;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <h1>Hello from Helm</h1>
+          <p>This test website is deployed with Helm, Argo CD, and Kubernetes.</p>
+        </div>
+      </body>
+    </html>

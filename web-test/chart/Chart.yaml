@@ -1,0 +1,24 @@
+apiVersion: v2
+
+# The name of the Helm chart itself.
+# This is not necessarily the same as the Kubernetes app name,
+# but usually it is similar.
+name: test-website
+
+# A short description of what this chart deploys.
+description: A simple Helm chart for a static test website served by nginx
+
+# The type of chart.
+# "application" means this chart deploys an app.
+# The other main option is "library", which is for reusable chart helpers only.
+type: application
+
+# The chart version.
+# This version is for the Helm package itself.
+# Increase this whenever you change the chart templates or chart structure.
+version: 0.1.0
+
+# The version of the application being deployed.
+# For a simple test site, you can set this to your own app version.
+# This does not have to match the nginx image version.
+appVersion: "1.0.0"

@@ -1,0 +1,45 @@
+{{/*
+  We wrap the entire Ingress in an "if" block so it is only created
+  when ingress.enabled is set to true in values.yaml.
+  This makes the chart flexible — you can disable the Ingress
+  if you ever want to use port-forward or a different routing method.
+*/}}
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  # The Ingress name, generated using the fullname helper.
+  # Example: "my-release-test-website"
+  name: {{ include "test-website.fullname" . }}
+
+  labels:
+    # Standard labels from _helpers.tpl.
+    {{- include "test-website.labels" . | nindent 4 }}
+
+spec:
+  # The Ingress class tells Kubernetes which Ingress controller to use.
+  # In your k3s/k3d setup, Traefik is the built-in controller.
+  # This value comes from ingress.className in values.yaml.
+  ingressClassName: {{ .Values.ingress.className }}
+
+  rules:
+    # The hostname that Traefik will listen for.
+    # This value comes from ingress.host in values.yaml.
+    # Example: "test-website.localhost"
+    # On your Mac, you access this via: http://test-website.localhost:8081
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.path }}
+            # "Prefix" means this rule matches any URL that starts with the path.
+            # For example, "/" matches all traffic for this host.
+            pathType: Prefix
+            backend:
+              service:
+                # The Service name must match what we defined in service.yaml.
+                # We use the same fullname helper to keep it consistent.
+                name: {{ include "test-website.fullname" . }}
+                port:
+                  # Must match the port defined in service.yaml.
+                  number: {{ .Values.service.port }}
+{{- end }}

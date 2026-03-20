@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  # The Service name, generated using the fullname helper.
+  # Example: "my-release-test-website"
+  name: {{ include "test-website.fullname" . }}
+
+  labels:
+    # Standard labels from _helpers.tpl.
+    {{- include "test-website.labels" . | nindent 4 }}
+
+spec:
+  # The type of service. 
+  # "ClusterIP" is the default and best choice when using an Ingress.
+  # It gives the service an internal IP reachable only inside the cluster.
+  type: {{ .Values.service.type }}
+
+  ports:
+    - port: {{ .Values.service.port }}
+      # The targetPort must match the containerPort defined in deployment.yaml (80).
+      targetPort: 80
+      protocol: TCP
+      # A name for the port, useful if you have multiple ports.
+      name: http
+
+  selector:
+    # This is the "glue" that connects the Service to your Pods.
+    # It must exactly match the selectorLabels defined in deployment.yaml.
+    {{- include "test-website.selectorLabels" . | nindent 4 }}

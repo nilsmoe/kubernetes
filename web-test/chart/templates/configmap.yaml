@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  # The ConfigMap name used by the Deployment when mounting the HTML file.
+  # We use the Helm helper so the name stays consistent with the rest of the chart.
+  name: {{ include "test-website.fullname" . }}-html
+
+  labels:
+    # Standard chart/app labels from _helpers.tpl.
+    {{- include "test-website.labels" . | nindent 4 }}
+
+data:
+  # This creates a key named "index.html" inside the ConfigMap.
+  # Later, the Deployment will mount this specific key into the nginx container
+  # as /usr/share/nginx/html/index.html.
+  index.html: |
+    {{- .Values.html.content | nindent 4 }}
